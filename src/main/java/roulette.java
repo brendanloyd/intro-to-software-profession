@@ -23,6 +23,29 @@ public class roulette {
         return input;
     }
 
+    public static void choiceHandler(int slots, int rouletteZero, int timesVisted, int dollars, int choice) {
+        switch(choice) {
+            case 1:
+                martingaleStrategy(slots, rouletteZero, timesVisted, dollars);
+                break;
+            case 2:
+                randomStrategy(slots, rouletteZero, timesVisted, dollars);
+                break;
+            case 3:
+                fixedBetStrategy(slots, rouletteZero, timesVisted, dollars);
+                break;
+        }
+    }
+
+    public static void martingaleStrategy(int slots, int rouletteZero, int timesVisted, int dollars) {
+    }
+
+    public static void randomStrategy(int slots, int rouletteZero, int timesVisted, int dollars) {
+    }
+
+    public static void fixedBetStrategy(int slots, int rouletteZero, int timesVisted, int dollars) {
+    }
+
     public static void menu() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Hello welcome to the casino, we will be playing a roulette wheel game.");
@@ -47,16 +70,9 @@ public class roulette {
         System.out.println("Enter a choice(1, 2, or 3):");
         int strategyChoice = validateInputs(1, 3, scanner);
         System.out.println("Awesome your choice was: " + strategyChoice);
+        choiceHandler(slots, rouletteZero, timesVisted, dollars, strategyChoice);
     }
 
-    public static void martingaleStrategy() {
-    }
-
-    public static void randomStrategy() {
-    }
-
-    public static void fixedBetStrategy() {
-    }
 
     public static void main(String[] args) {
         menu();
