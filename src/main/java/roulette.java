@@ -37,7 +37,35 @@ public class roulette {
         }
     }
 
+    public static int getRandomNumber(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
+    }
+
     public static void martingaleStrategy(int slots, int rouletteZero, int timesVisted, int dollars) {
+        int multiplier = 2;
+        int rouletteWheel = slots - rouletteZero;
+
+        for(int i = 0; i < (timesVisted - 1); i++) {
+            int bet = 1;
+            int totalBet = 0;
+            int count = 0;
+            boolean winFlag = true;
+            while (winFlag) {
+                count++;
+                totalBet += bet;
+                int winningNumber = getRandomNumber(0, rouletteWheel);
+                if (winningNumber % 2 == 1) {
+                    System.out.println("Congrats you win 1 dollar after :" + count + " times.");
+                    winFlag = false;
+                } else {
+                    dollars -= bet;
+                    bet *= multiplier;
+                    if (dollars < bet) {
+                        System.out.println("You ran out of money. Sorry.");
+                    }
+                }
+            }
+        }
     }
 
     public static void randomStrategy(int slots, int rouletteZero, int timesVisted, int dollars) {
