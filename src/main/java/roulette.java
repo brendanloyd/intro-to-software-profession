@@ -4,10 +4,13 @@
 //External files: None
 
 package main.java;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+//This program simulates a roulette wheel at a casino asking the user a series of questions including betting strategy before starting simulation.
 
 public class roulette {
     //This method validates inputs made my the user to insure correct input, otherwise it will produce an error and re prompt
@@ -58,7 +61,9 @@ public class roulette {
     }
 
     // Displays results to the user.
-    public static void displayResults(final int slots, final int rouletteZero, final int timesVisited, final int dollars, int totalBet, int winnings, final int choice, int biggestWin, int zeroDollars, int leftWithMoreDollars, int leftWithLessDollars, int leftWithSameDollars) {
+    public static void displayResults(final int slots, final int rouletteZero, final int timesVisited, final int dollars, int totalBet, int winnings, final int choice, int biggestWin, int zeroDollars, int leftWithMoreDollars, int leftWithLessDollars, int leftWithSameDollars, List<Integer> changeInMoney) {
+        Double averageChangeInMoney = changeInMoney.stream().mapToDouble(val -> val).average().orElse(0.0); // https://stackoverflow.com/questions/10791568/calculating-average-of-an-array-list
+
         System.out.println("You started with: " + slots + " slots.");
         System.out.println("You entered: " + rouletteZero + " slots that start with 0/00.");
         System.out.println("You visited: " + timesVisited + " times.");
@@ -68,35 +73,36 @@ public class roulette {
         System.out.println("The total dollars bet was: $" + totalBet);
         System.out.println("The total dollars walked away with is: $" + ((timesVisited * dollars) + winnings) + " at a % gain of: " + ((winnings / (double)(dollars*timesVisited)) * 100) + "%.");
         System.out.println("Your biggest win was: " + biggestWin);
+        System.out.println("Your average change in dollars over your visits was: $" + averageChangeInMoney);
         System.out.println("How many times you ended up with zero dollars: " + zeroDollars);
         System.out.println("How many times you left with more dollars: " + leftWithMoreDollars);
         System.out.println("How many times you left with less dollars: " + leftWithLessDollars);
         System.out.println("How many times you left with the same dollars: " + leftWithSameDollars);
 
         promptEnterKey();
-
-
     }
 
     //This method comprises the enter workings of the martingale strategy. calling the displayResults method at the end.
     public static void martingaleStrategy(final int slots, final int rouletteZero, final int timesVisited, final int dollars, final int choice) {
-        int totalWinnings = 0, totalBet = 0, biggestWin = 0, endedUpWithZeroDollars = 0, leftWithMoreDollars = 0, leftWithLessDollars = 0, leftWithSameDollars = 0, currentDollars = dollars;
+        int totalWinnings = 0, totalBet = 0, biggestWin = 0, endedUpWithZeroDollars = 0, leftWithMoreDollars = 0, leftWithLessDollars = 0, leftWithSameDollars = 0;
+        List<Integer> changeInMoney = new ArrayList<>();
 
         List<Integer> zeros = IntStream.range(0, rouletteZero).boxed().collect(Collectors.toList()); // https://stackoverflow.com/questions/16711147/populating-a-list-with-a-contiguous-range-of-integers/23675131
         for(int i = 0; i < timesVisited; i++) {
+            int currentDollars = dollars;
             int bet = 1, totalBetPerVisit = 0;
             boolean winFlag = true;
-            totalBet += totalBetPerVisit;
 
             while (winFlag) {
                 totalBetPerVisit += bet;
                 int winningNumber = getRandomNumber(0, slots);
                 if (!zeros.contains(winningNumber) && winningNumber % 2 == 1) {
                     totalWinnings += (bet*2) - totalBetPerVisit;
+                    currentDollars += bet * 2;
                     biggestWin = Math.max(bet * 2, biggestWin);
                     winFlag = false;
                 } else {
-                    currentDollars-= bet;
+                    currentDollars -= bet;
                     bet *= 2;
                     if (currentDollars < bet) {
                         winFlag = false;
@@ -106,6 +112,10 @@ public class roulette {
                     }
                 }
             }
+
+            changeInMoney.add(currentDollars - dollars);
+            totalBet += totalBetPerVisit;
+
             if(currentDollars > dollars) {
                 leftWithMoreDollars++;
             } else if (currentDollars < dollars) {
@@ -115,14 +125,17 @@ public class roulette {
             }
         }
 
-        displayResults(slots, rouletteZero, timesVisited, dollars, totalBet, totalWinnings, choice, biggestWin, endedUpWithZeroDollars, leftWithMoreDollars, leftWithLessDollars, leftWithSameDollars);
+        displayResults(slots, rouletteZero, timesVisited, dollars, totalBet, totalWinnings, choice, biggestWin, endedUpWithZeroDollars, leftWithMoreDollars, leftWithLessDollars, leftWithSameDollars, changeInMoney);
     }
+
     //This method comprises the enter workings of the randomStrategy. calling the displayResults method at the end.
     public static void randomStrategy(final int slots, final int rouletteZero, final int timesVisited, final int dollars, final int choice) {
-        int totalWinnings = 0, totalBet = 0, biggestWin = 0, endedUpWithZeroDollars = 0, leftWithMoreDollars = 0, leftWithLessDollars = 0, leftWithSameDollars = 0, currentDollars = dollars;
+        int totalWinnings = 0, totalBet = 0, biggestWin = 0, endedUpWithZeroDollars = 0, leftWithMoreDollars = 0, leftWithLessDollars = 0, leftWithSameDollars = 0;
+        List<Integer> changeInMoney = new ArrayList<>();
 
         List<Integer> zeros = IntStream.range(0, rouletteZero).boxed().collect(Collectors.toList()); // https://stackoverflow.com/questions/16711147/populating-a-list-with-a-contiguous-range-of-integers/23675131
         for(int i = 0; i < timesVisited; i++) {
+            int currentDollars = dollars;
             int bet = getRandomNumber(1, dollars);
             int betCount = 0;
 
@@ -153,6 +166,9 @@ public class roulette {
                     winFlag = false;
                 }
             }
+
+            changeInMoney.add(currentDollars - dollars);
+
             if(currentDollars > dollars) {
                 leftWithMoreDollars++;
             } else if (currentDollars < dollars) {
@@ -161,18 +177,22 @@ public class roulette {
                 leftWithSameDollars++;
             }
         }
-        displayResults(slots, rouletteZero, timesVisited, dollars, totalBet, totalWinnings ,choice, biggestWin, endedUpWithZeroDollars, leftWithMoreDollars, leftWithLessDollars, leftWithSameDollars);
+
+        displayResults(slots, rouletteZero, timesVisited, dollars, totalBet, totalWinnings ,choice, biggestWin, endedUpWithZeroDollars, leftWithMoreDollars, leftWithLessDollars, leftWithSameDollars, changeInMoney);
     }
+
     //This method comprises the enter workings of the fixedBetStrategy. calling the displayResults method at the end.
     public static void fixedBetStrategy(final int slots, final int rouletteZero, final int timesVisited, final int dollars, final int choice) {
-        int totalWinnings = 0, totalBet = 0, biggestWin = 0, endedUpWithZeroDollars = 0, leftWithMoreDollars = 0, leftWithLessDollars = 0, leftWithSameDollars = 0, currentDollars = dollars;
+        int totalWinnings = 0, totalBet = 0, biggestWin = 0, endedUpWithZeroDollars = 0, leftWithMoreDollars = 0, leftWithLessDollars = 0, leftWithSameDollars = 0;
+        List<Integer> changeInMoney = new ArrayList<>();
 
         Scanner scanner = new Scanner(System.in);
-        System.out.println("How much is your fixed bet: ");
+        System.out.println("Your fixed bet is: ");
         int bet = validateInputs(1, dollars, scanner);
 
         List<Integer> zeros = IntStream.range(0, rouletteZero).boxed().collect(Collectors.toList()); // https://stackoverflow.com/questions/16711147/populating-a-list-with-a-contiguous-range-of-integers/23675131
         for (int i = 0; i < timesVisited; i++) {
+            int currentDollars = dollars;
             int betCount = 0, totalBetPerVisit = 0;
             boolean winFlag = true;
 
@@ -199,6 +219,9 @@ public class roulette {
                     winFlag = false;
                 }
             }
+
+            changeInMoney.add(currentDollars - dollars);
+
             if(currentDollars > dollars) {
                 leftWithMoreDollars++;
             } else if (currentDollars < dollars) {
@@ -207,7 +230,8 @@ public class roulette {
                 leftWithSameDollars++;
             }
         }
-        displayResults(slots, rouletteZero, timesVisited, dollars, totalBet, totalWinnings, choice, biggestWin, endedUpWithZeroDollars, leftWithMoreDollars, leftWithLessDollars, leftWithSameDollars);
+
+        displayResults(slots, rouletteZero, timesVisited, dollars, totalBet, totalWinnings, choice, biggestWin, endedUpWithZeroDollars, leftWithMoreDollars, leftWithLessDollars, leftWithSameDollars, changeInMoney);
     }
     //This method is the menu. It handles the gathering the inputs from the user and then calling the choiceHandler to bring the program to the next phase.
     public static void menu() {
